@@ -1,3 +1,3 @@
-module github.com/miro-puetz/HTTP-Server
+module github.com/miro-puetz/http-server
 
 go 1.17
