@@ -14,7 +14,7 @@ var addr string = ":8080"
 
 func main() {
 
-	logFilename := flag.String("logFilename", "", "log output to given file name or leave empty for standard output")
+	logFilename := flag.String("logFilename", "", "log output to given filename or leave empty for standard output")
 
 	flag.Parse()
 
@@ -26,9 +26,11 @@ func main() {
 		log.SetOutput(file)
 	}
 
+	mux := server.NewMux()
+
 	srv := &http.Server{
 		Addr:              addr,
-		Handler:           http.HandlerFunc(server.DefaultHandler),
+		Handler:           mux,
 		IdleTimeout:       5 * time.Minute,
 		ReadHeaderTimeout: time.Minute,
 	}
