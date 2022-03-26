@@ -22,5 +22,5 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	fmt.Fprintln(w, string(response))
+	fmt.Fprint(w, string(response))
 }
