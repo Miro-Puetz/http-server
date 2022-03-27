@@ -22,7 +22,6 @@ func noContent(w http.ResponseWriter, r *http.Request) {
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	var response string
-
 	switch r.Method {
 	case http.MethodGet:
 		response = "You have send me a get request"

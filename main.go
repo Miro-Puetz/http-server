@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	server "github.com/miro-puetz/http-server/src"
+	server "github.com/miro-puetz/http-server/src/server"
 )
 
 var addr string = ":8080"
