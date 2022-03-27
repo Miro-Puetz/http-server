@@ -6,7 +6,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	url := "http://:8080/index"
+	url := "http://:8080/"
 	resp, err := doClientRequest(url)
 	if err != nil {
 		t.Errorf("%v", err)
