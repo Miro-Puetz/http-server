@@ -1,0 +1,3 @@
+[submodule "benchttp"]
+	path = benchttp
+	url = git@github.com:siadat/benchttp.git
