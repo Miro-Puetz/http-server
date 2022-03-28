@@ -11,11 +11,9 @@ import (
 
 var tpl *template.Template
 
-func init() {
-	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
-}
-
 func NewMux() *http.ServeMux {
+	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", DefaultHandler)
 	mux.Handle("/files/", http.StripPrefix("/files", http.FileServer(http.Dir("."))))
@@ -24,6 +22,7 @@ func NewMux() *http.ServeMux {
 }
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL, r.Body)
 	var response string
 	switch r.Method {
 	case http.MethodGet:
@@ -46,13 +45,12 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCodes(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL, r.Body)
 	var code string
 	splitUrl := strings.Split(r.URL.Path, "/")
-	fmt.Println(splitUrl, len(splitUrl))
 	if len(splitUrl) > 2 {
 		code = splitUrl[2]
 	}
-	fmt.Println(code)
 	if code != "" {
 		switch code {
 		case "200":

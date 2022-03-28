@@ -10,16 +10,15 @@ import (
 
 func TestRequests(t *testing.T) {
 	testCases := []struct {
-		method   string
-		body     io.Reader
-		code     int
-		response string
+		method string
+		body   io.Reader
+		code   int
 	}{
-		{http.MethodGet, nil, http.StatusOK, "You have send me a get request"},
-		{http.MethodGet, bytes.NewBufferString("Can I have a body?"), http.StatusOK, "You have send me a get request"},
-		{http.MethodPost, bytes.NewBufferString("I am a small body"), http.StatusOK, "You have send me a post request: I am a small body"},
-		{http.MethodPost, nil, http.StatusOK, "You have send me a post request: "},
-		{http.MethodHead, nil, http.StatusMethodNotAllowed, ""},
+		{http.MethodGet, nil, http.StatusOK},
+		{http.MethodGet, bytes.NewBufferString("Can I have a body?"), http.StatusOK},
+		{http.MethodPost, bytes.NewBufferString("I hava a small body"), http.StatusOK},
+		{http.MethodPost, nil, http.StatusOK},
+		{http.MethodHead, nil, http.StatusMethodNotAllowed},
 	}
 
 	client := new(http.Client)
@@ -42,12 +41,9 @@ func TestRequests(t *testing.T) {
 			t.Errorf("%d: unexpected status code: %q", i, resp.StatusCode)
 		}
 
-		b, err := ioutil.ReadAll(resp.Body)
+		_, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			t.Errorf("%d: %v", i, err)
-		}
-		if string(b) != c.response {
-			t.Errorf("%d: expected %q; actual %q", i, c.response, b)
 		}
 	}
 }
