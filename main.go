@@ -11,11 +11,10 @@ import (
 	server "github.com/miro-puetz/http-server/src/server"
 )
 
-var addr string = ":8080"
-
 func main() {
-
 	logFilename := flag.String("logFilename", "", "log output to given filename or leave empty for standard output")
+	certFilename := flag.String("cert", "", "certificate")
+	pkeyFilename := flag.String("key", "", "private key")
 
 	flag.Parse()
 
@@ -29,21 +28,37 @@ func main() {
 
 	mux := server.NewMux()
 
-	cert, err := tls.LoadX509KeyPair("cert/localhost.crt", "cert/localhost.key")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	srv := &http.Server{
-		Addr:              addr,
+	httpSrv := &http.Server{
+		Addr:              ":8080",
 		Handler:           mux,
 		IdleTimeout:       5 * time.Minute,
 		ReadHeaderTimeout: time.Minute,
-		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		},
 	}
 
-	log.Println("Server started")
-	log.Fatal(srv.ListenAndServeTLS("", ""))
+	// HTTPS Server
+	if *certFilename != "" && *pkeyFilename != "" {
+		cert, err := tls.LoadX509KeyPair(*certFilename, *pkeyFilename)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		httpsSrv := &http.Server{
+			Addr:              ":10443",
+			Handler:           mux,
+			IdleTimeout:       5 * time.Minute,
+			ReadHeaderTimeout: time.Minute,
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			},
+		}
+
+		go func() {
+			log.Println("HTTPS Server started")
+			log.Fatal(httpsSrv.ListenAndServeTLS("", ""))
+		}()
+	}
+
+	// HTTP Server
+	log.Println("HTTP Server started")
+	log.Fatal(httpSrv.ListenAndServe())
 }
