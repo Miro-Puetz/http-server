@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/pprof"
+	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -20,12 +22,13 @@ func NewMux() *http.ServeMux {
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 	mux.Handle("/files/", http.StripPrefix("/files", http.FileServer(http.Dir("."))))
 	mux.HandleFunc("/status-codes/", handleCodes)
+	mux.HandleFunc("/upload/", fileUpload)
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
 	return mux
 }
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL, r.Body)
+	log.Println(r.Method, r.URL)
 	var response string
 	switch r.Method {
 	case http.MethodGet:
@@ -48,7 +51,7 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCodes(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL, r.Body)
+	log.Println(r.Method, r.URL)
 	var code string
 	splitUrl := strings.Split(r.URL.Path, "/")
 	if len(splitUrl) > 2 {
@@ -76,4 +79,52 @@ func handleCodes(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 	}
+}
+
+func fileUpload(w http.ResponseWriter, r *http.Request) {
+	executeTemplate := func() {
+		err := tpl.ExecuteTemplate(w, "file-upload.gohtml", nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err)
+		}
+	}
+
+	uploadFile := func() {
+		f, h, err := r.FormFile("up")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer f.Close()
+
+		bs, err := ioutil.ReadAll(f)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		dst, err := os.Create(filepath.Join("./uploads/", h.Filename))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+
+		_, err = dst.Write(bs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "Upload to /files/%s successful!\n", dst.Name())
+	}
+
+	log.Println(r.Method, r.URL)
+	if r.Method == http.MethodPost {
+		uploadFile()
+	} else {
+		executeTemplate()
+	}
+
 }
