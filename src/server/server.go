@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	"strings"
 	"text/template"
 )
@@ -16,8 +17,10 @@ func NewMux() *http.ServeMux {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", DefaultHandler)
+	mux.Handle("/favicon.ico", http.NotFoundHandler())
 	mux.Handle("/files/", http.StripPrefix("/files", http.FileServer(http.Dir("."))))
 	mux.HandleFunc("/status-codes/", handleCodes)
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
 	return mux
 }
 

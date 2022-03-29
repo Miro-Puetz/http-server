@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 
@@ -27,13 +28,6 @@ func main() {
 	}
 
 	mux := server.NewMux()
-
-	httpSrv := &http.Server{
-		Addr:              ":8080",
-		Handler:           mux,
-		IdleTimeout:       5 * time.Minute,
-		ReadHeaderTimeout: time.Minute,
-	}
 
 	// HTTPS Server
 	if *certFilename != "" && *pkeyFilename != "" {
@@ -59,6 +53,13 @@ func main() {
 	}
 
 	// HTTP Server
+	httpSrv := &http.Server{
+		Addr:              ":8080",
+		Handler:           mux,
+		IdleTimeout:       5 * time.Minute,
+		ReadHeaderTimeout: time.Minute,
+	}
+
 	log.Println("HTTP Server started")
 	log.Fatal(httpSrv.ListenAndServe())
 }
